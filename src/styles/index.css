@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Lato", sans-serif;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+.countdown-item {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  line-height: 30px;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: red;
+}
+
+.countdown-item span {
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.countdown-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+}
+
+.swap-form-bg {
+  background: rgba(80, 146, 245, 0.05);
+  border: 1px solid rgba(80, 146, 245, 0.1);
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+}
+
+.modal-close-icon {
+  @apply w-6 h-6 border border-slate-900 dark:border-slate-200 rounded-full transition duration-300;
+}
+.modal-token-item {
+  @apply flex items-center justify-start py-2 px-6 gap-x-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 hover:bg-opacity-70;
+}
+.modal-token-item.disabled {
+  @apply pointer-events-none opacity-50 hover:bg-transparent;
+}
+.modal-token-name {
+  @apply font-light text-sm text-slate-500 dark:text-slate-200;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+/* Track */
+.hidden-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-200 rounded-lg;
+}
+.hidden-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-primary rounded-lg;
+}
