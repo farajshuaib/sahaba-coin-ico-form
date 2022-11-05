@@ -4,7 +4,6 @@ import { ethers, Contract, utils, BigNumber } from "ethers";
 import presaleAbi from "../contracts/presaleAbi.json";
 import tokenAbi from "../contracts/tokenAbi.json";
 
-
 export const getBalance = async (address: string) => {
   if (!window?.ethereum) {
     toast.warning("you don't have metamask extension on your browser");
@@ -43,6 +42,11 @@ export const calculateParityFromTo = (parityRate: string, value: string) => {
   return Number.parseFloat(value) / Number.parseFloat(parityRate);
 };
 
+export const calculateParityFromFrom = (parityRate: string, value: string) => {
+  if (!+parityRate || !+value) return 0;
+  return Number.parseFloat(value) * Number.parseFloat(parityRate);
+};
+
 export const fetchTotalTokensSold = async (signer: any) => {
   try {
     const preSaleContract = new Contract(
@@ -63,7 +67,11 @@ export const fetchTotalTokensSold = async (signer: any) => {
   }
 };
 
-export const fetchBuyersAmount = async (address: any, signer: any, lockedBalance: number | string) => {
+export const fetchBuyersAmount = async (
+  address: any,
+  signer: any,
+  lockedBalance: number | string
+) => {
   const tokenContract = new Contract(
     environment.lockedToken.address,
     tokenAbi,

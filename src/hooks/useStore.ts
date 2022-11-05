@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
 import { environment } from "../config";
 import {
+  calculateParityFromFrom,
   calculateParityFromTo,
   fetchBuyersAmount,
   getBalance,
@@ -51,8 +52,8 @@ const useStore = () => {
       );
       setToTokenBalance(balance);
 
-      const totalTokensSoldAmount = await vendorContract.totalTokenSold();
-      setTotalTokenSold(+utils.formatEther(totalTokensSoldAmount).toString());
+      // const totalTokensSoldAmount = await vendorContract.totalTokenSold();
+      // setTotalTokenSold(+utils.formatEther(totalTokensSoldAmount).toString());
 
       const totalTokensForSaleAmount = await vendorContract.totalTokenForSale();
       setTotalTokenForSale(
@@ -110,7 +111,10 @@ const useStore = () => {
   // watch price in other coin
   useEffect(() => {
     setPriceTo(
-      calculateParityFromTo(pricePerEther as string, priceFrom as string).toString()
+      calculateParityFromTo(
+        pricePerEther as string,
+        priceFrom as string
+      ).toString()
     );
   }, [priceFrom]);
 
@@ -134,7 +138,7 @@ const useStore = () => {
     chainId,
     deactivate,
     loading,
-    pricePerEther
+    pricePerEther,
   };
 };
 
