@@ -27,13 +27,16 @@ const useStore = () => {
   const { active, library, account, chainId, deactivate } = useWeb3React();
   const [loading, setLoading] = useState<boolean>(false);
 
-  async function getAccount() {
-    try {
-      if (!account) return;
-      setLoading(true);
-      const netBalance = await getBalance(account); // utils.formatEther(netBalanceResourse);   // utils.parseUnits(netBalanceResourse).toString();
 
-      const vendorContract = new Contract(
+  async function getAccount() {
+    if (!account) return;
+    try {
+      setLoading(true);
+      const netBalanceResourse = await getBalance(account);
+
+      const netBalance = netBalanceResourse; // utils.formatEther(netBalanceResourse);   // utils.parseUnits(netBalanceResourse).toString();
+
+      const presaleContract = new Contract(
         environment.vendorAddress,
         presaleAbi as any,
         library.getSigner()
@@ -42,8 +45,30 @@ const useStore = () => {
       tokens.forEach(async (token) => {
         if (token.id === environment.networkMainToken) {
           token.balance = netBalance;
+
+          const rateOfNativeCurrencyResponse = await presaleContract.rate();
+          token.price = utils
+            .formatEther(rateOfNativeCurrencyResponse)
+            .toString();
+
+          // changeSelectFromToken(token.token);
+        } else {
+          const contract = new Contract(
+            token.address?.toString() as string,
+            tokenAbi,
+            library.getSigner()
+          );
+
+          // const tokenBalance = await contract.balanceOf(account);
+          // token.balance = utils.formatUnits(tokenBalance, token.decimals);
+
+          const rateOfToken = await presaleContract.tokenPrices(token.address);
+
+          token.price = utils.formatUnits(rateOfToken, token.decimals);
         }
       });
+
+      setTokens([...tokens]);
 
       const balance = await fetchBuyersAmount(
         account,
@@ -51,57 +76,130 @@ const useStore = () => {
         toTokenBalance
       );
       setToTokenBalance(balance);
-
-      // const totalTokensSoldAmount = await vendorContract.totalTokenSold();
-      // setTotalTokenSold(+utils.formatEther(totalTokensSoldAmount).toString());
-
-      const totalTokensForSaleAmount = await vendorContract.totalTokenForSale();
-      setTotalTokenForSale(
-        +utils.formatEther(totalTokensForSaleAmount).toString()
-      );
-
-      const tokenPrice = await vendorContract.getTokenPrice();
-      setPricePerEther(utils.formatEther(tokenPrice).toString());
-
       setLoading(false);
     } catch (errors: any) {
-      console.log("errors", errors);
       setLoading(false);
+      console.log("errors", errors);
       throw errors;
     }
   }
 
-  async function buyTokens() {
+  async function buyToken(
+    value: string | number,
+    token: Token,
+    signer: any,
+    address: string
+  ) {
+    if (!+value) return;
     try {
-      if (!account) return;
-      setLoading(true);
-      const vendorContract = new Contract(
+      const preSaleContract = new Contract(
         environment.vendorAddress,
         presaleAbi as any,
-        library.getSigner()
+        signer
       );
 
-      const tx = await vendorContract.buyTokens({
-        value: utils.parseEther(parseFloat(priceFrom).toString()),
-        gasLimit: 3 * 10 ** 6,
+      const amount = utils.parseUnits(value.toString(), token.decimals);
+
+      if (token.id === environment.networkMainToken) {
+        const tx = await preSaleContract.buyToken(
+          environment.ZERO_ADDRESS,
+          "0".repeat(environment.TOKEN_DECIMAL),
+          {
+            from: address,
+            value: amount,
+          }
+        );
+        await tx.wait();
+      } else {
+        const tokenContract = new Contract(
+          token.address as string,
+          tokenAbi as any,
+          signer
+        );
+
+        const allowance = await tokenContract.allowance(
+          address,
+          environment.vendorAddress
+        );
+
+        if (!Number(allowance)) {
+          await tokenContract.approve(
+            environment.vendorAddress,
+            utils.parseEther("9999999999999999999999999999"),
+            { from: address }
+          );
+          toast.success("Spend approved");
+        }
+
+        const tx = await preSaleContract.buyToken(token.address, amount, {
+          from: address,
+        });
+        await tx.wait();
+      }
+
+      // if (environment.apiUrl) {
+      //   axios.post(`${environment.apiUrl}/purchase-successful`, payload);
+      // }
+
+      toast.success(
+        `You have successfully purchased $${environment.lockedToken.id} Tokens. Thank you!`
+      );
+
+      // const totalTokensSold = await fetchTotalTokensSold(signer);
+
+      tokens.forEach(async (token) => {
+        if (token.id === environment.networkMainToken) {
+          // const netBalanceResponse = await getBalance(address);
+          // const netBalance = utils.formatEther(netBalanceResponse);
+
+          token.balance = await getBalance(address);
+        } else {
+          const contract = new Contract(
+            token.address as string,
+            tokenAbi,
+            signer
+          );
+          const tokenBalance = await contract.balanceOf(address);
+
+          const balance = utils.formatUnits(tokenBalance, token.decimals);
+          token.balance = balance;
+        }
       });
 
-      console.log(tx);
-
-      await tx.wait();
-
-      const balance = await fetchBuyersAmount(
-        account,
-        library.getSigner(),
-        toTokenBalance
-      );
+      setTokens([...tokens]);
+      const balance = await fetchBuyersAmount(address, signer, toTokenBalance);
       setToTokenBalance(balance);
-      setLoading(false);
-    } catch (errors: any) {
-      console.log("errors", errors);
-      setLoading(false);
-      throw errors;
+    } catch (error: any) {
+      console.log("err", error.message);
+      toast.error(error?.message || "Signing failed, please try again!");
     }
+  }
+
+  async function checkLimitations(priceTo: string | number = 0) {
+    const rate = tokens.find(
+      (t) => t.id === environment.networkMainToken
+    )?.price;
+
+    if (!rate) {
+      toast.error("something went wrong");
+      return false;
+    }
+
+    const totalBalance = (+toTokenBalance + +priceTo) * +rate;
+
+    if (totalBalance < environment.minTokenAmount) {
+      toast.error(
+        `You can not buy less than ${environment.minTokenAmount} ${environment.networkMainToken}`
+      );
+      return false;
+    } else if (totalBalance > environment.maxTokenAmount) {
+      toast.error(
+        `You can not buy more than ${environment.maxTokenAmount} ${environment.networkMainToken}`
+      );
+      return false;
+    }
+
+    return true;
   }
 
   useEffect(() => {
@@ -119,6 +217,7 @@ const useStore = () => {
   }, [priceFrom]);
 
   return {
+    checkLimitations,
     tokens,
     setTokens,
     toTokenBalance,
@@ -127,7 +226,7 @@ const useStore = () => {
     tokenFrom,
     setTokenFrom,
     priceFrom,
-    buyTokens,
+    buyToken,
     setPriceFrom,
     priceTo,
     setPriceTo,
