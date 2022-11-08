@@ -25,7 +25,7 @@ export const PHONE_NUMBER = "00218911629062";
 export const TELEGRAM_LINK = "https://t.me/sahabacoin";
 
 export const environment = {
-  vendorAddress: "0xb4FAb02c1b41fA4C762CB35B50799bD440Ec07eF",
+  vendorAddress: "0x2f16151cAC12E2fC501a8d093511064F870aC3f8",
   networkName: "Goerli Test Network",
   networkMainToken: "ETH",
   networkId: 5,
@@ -41,7 +41,7 @@ export const environment = {
     id: "SBH",
     name: "Sahaba",
     image: "/images/tokens/sahaba.svg",
-    address: "0xc18C64d0d70771C1Dc757daF0D98003BfEB9A5B9",
+    address: "0x54460CC6574442b1ac12dd71C509Ac421E3Ab031",
     decimals: 18,
   },
 
