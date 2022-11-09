@@ -2,7 +2,6 @@ import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
 import { environment } from "../config";
 import {
-  calculateParityFromFrom,
   calculateParityFromTo,
   fetchBuyersAmount,
   getBalance,
@@ -19,14 +18,8 @@ const useStore = () => {
   const [priceFrom, setPriceFrom] = useState<string>("");
   const [priceTo, setPriceTo] = useState<string>("");
   const [toTokenBalance, setToTokenBalance] = useState<number | string>(0);
-  const [totalTokenForSale, setTotalTokenForSale] = useState<number | string>(
-    0
-  );
-  const [totalTokenSold, setTotalTokenSold] = useState<number | string>(0);
-  const [pricePerEther, setPricePerEther] = useState<number | string>(0);
   const { active, library, account, chainId, deactivate } = useWeb3React();
   const [loading, setLoading] = useState<boolean>(false);
-
 
   async function getAccount() {
     if (!account) return;
@@ -54,12 +47,13 @@ const useStore = () => {
           // changeSelectFromToken(token.token);
         } else {
           const contract = new Contract(
-            token.address?.toString() as string,
+            token.address as string,
             tokenAbi,
             library.getSigner()
           );
 
           // const tokenBalance = await contract.balanceOf(account);
+          // console.log(tokenBalance)
           // token.balance = utils.formatUnits(tokenBalance, token.decimals);
 
           const rateOfToken = await presaleContract.tokenPrices(token.address);
@@ -210,7 +204,7 @@ const useStore = () => {
   useEffect(() => {
     setPriceTo(
       calculateParityFromTo(
-        pricePerEther as string,
+        tokenFrom.price as string,
         priceFrom as string
       ).toString()
     );
@@ -230,14 +224,13 @@ const useStore = () => {
     setPriceFrom,
     priceTo,
     setPriceTo,
-    totalTokenForSale,
     active,
     library,
     account,
     chainId,
     deactivate,
     loading,
-    pricePerEther,
+    setLoading,
   };
 };
 

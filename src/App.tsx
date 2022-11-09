@@ -1,11 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useStore from "./hooks/useStore";
-import {
-  addTokenAsset,
-  calculateParityFromTo,
-  getBalance,
-} from "./utils/functions";
 import figure1 from "./assets/figure-1.png";
 import figure2 from "./assets/fs-bg-2.png";
 import { environment } from "./config";
@@ -26,16 +21,18 @@ const App: React.FC = () => {
     setPriceTo,
     buyToken,
     checkLimitations,
+    loading,
+    setLoading,
+    active,
+    library,
+    account,
+    deactivate,
   } = useStore();
 
   const [connectToWalletModalVisible, setConnectToWalletModalVisible] =
     useState(false);
   const [tokenSelectorModalVisible, setTokenSelectorModalVisible] =
     useState<boolean>(false);
-  const [limitationAlert, setLimitationAlert] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const { active, library, account, chainId, deactivate } = useWeb3React();
 
   const setBalance = (val: number) => {
     if (!tokenFrom?.balance) return;
@@ -65,16 +62,6 @@ const App: React.FC = () => {
     setLoading(false);
   };
 
-  // watch price in other coin
-  useEffect(() => {
-    setPriceTo(
-      calculateParityFromTo(
-        tokenFrom?.price as string,
-        priceFrom as string
-      ).toString()
-    );
-  }, [priceFrom]);
-
   const insufficientBalance = useMemo(() => {
     return (tokenFrom?.balance ?? 0) < +priceFrom;
   }, [tokenFrom, priceFrom]);
@@ -98,7 +85,6 @@ const App: React.FC = () => {
           className="absolute right-24 animated-img top-0 hidden md:block"
         /> */}
       <main id="swapForm" className="relative my-5">
-       
         <form
           onSubmit={submit}
           className="flex flex-col gap-8 w-full md:w-3/4 xl:w-1/2 p-5 md:p-12 mx-auto rounded-lg swap-form-bg"
@@ -128,9 +114,7 @@ const App: React.FC = () => {
               </button>
               <input
                 placeholder="0.0"
-                className={`${
-                  limitationAlert && "text-red-600"
-                } py-4 px-5 pl-20 border focus-within:ring-4 focus:ring-4 border-gray-200 rounded-lg bg-white font-medium text-3xl w-full`}
+                className={` py-4 px-5 pl-20 border focus-within:ring-4 focus:ring-4 border-gray-200 rounded-lg bg-white font-medium text-3xl w-full`}
                 min="0"
                 value={priceFrom}
                 onChange={(e) => setPriceFrom(e.currentTarget.value)}
@@ -199,7 +183,7 @@ const App: React.FC = () => {
           <button
             type="submit"
             onClick={submit}
-            disabled={active && insufficientBalance}
+            disabled={(active && insufficientBalance) || loading}
             className={`block w-full ${
               insufficientBalance ? "bg-gray-400" : "bg-primary"
             } rounded-lg py-3 font-bold leading-relaxed tracking-wider text-white`}

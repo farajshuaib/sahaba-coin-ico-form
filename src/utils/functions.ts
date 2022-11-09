@@ -14,37 +14,9 @@ export const getBalance = async (address: string) => {
   return balanceInEth;
 };
 
-export const getEndTime = async (signer: any) => {
-  try {
-    const preSaleContract = new Contract(
-      environment.vendorAddress,
-      presaleAbi as any,
-      signer
-    );
-
-    const preSaleEndAt = await preSaleContract?.preSaleEndTime();
-
-    console.log(new Date(preSaleEndAt * 1000));
-
-    return new Date(preSaleEndAt * 1000) as Date;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const calculateParityToFrom = (parityRate: string, value: string) => {
-  if (!+parityRate || !+value) return 0;
-  return Number.parseFloat(value) * Number.parseFloat(parityRate);
-};
-
 export const calculateParityFromTo = (parityRate: string, value: string) => {
   if (!+parityRate || !+value) return 0;
   return Number.parseFloat(value) / Number.parseFloat(parityRate);
-};
-
-export const calculateParityFromFrom = (parityRate: string, value: string) => {
-  if (!+parityRate || !+value) return 0;
-  return Number.parseFloat(value) * Number.parseFloat(parityRate);
 };
 
 export const fetchTotalTokensSold = async (signer: any) => {
