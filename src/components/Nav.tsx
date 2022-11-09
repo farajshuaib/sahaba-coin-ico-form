@@ -10,7 +10,7 @@ const Nav: React.FC = () => {
       <div className="container mx-auto flex justify-between">
         <div className="logo flex items-center gap-x-2">
           <img src="/logo_dark.png" className="w-24 object-cover" />
-          <h1 className="text-4xl text-gray-700 uppercase leading-relaxed text-light">
+          <h1 className="text-4xl hidden lg:inline-block text-gray-700 uppercase leading-relaxed text-light">
             Sahaba Coin
           </h1>
         </div>
