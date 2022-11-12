@@ -68,6 +68,9 @@ const App: React.FC = () => {
 
   return (
     <div className="App relative ">
+      <div className="text-center bg-yellow-200 text-yellow-700 p-5 text-lg leading-relaxed tracking-wide">
+        This is a demo app for the sahaba coin, a coin is still under development
+      </div>
       <Nav />
       <img
         src={figure1}
