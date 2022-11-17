@@ -52,13 +52,12 @@ const useStore = () => {
             library.getSigner()
           );
 
-          // const tokenBalance = await contract.balanceOf(account);
-          // console.log(tokenBalance)
-          // token.balance = utils.formatUnits(tokenBalance, token.decimals);
+          const tokenBalance = await contract.balanceOf(account);
+          token.balance = utils.formatUnits(tokenBalance, token.decimals);
 
           const rateOfToken = await presaleContract.tokenPrices(token.address);
 
-          token.price = utils.formatUnits(rateOfToken, token.decimals);
+          token.price = +utils.formatUnits(rateOfToken, token.decimals);
         }
       });
 

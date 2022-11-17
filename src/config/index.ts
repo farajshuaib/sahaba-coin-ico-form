@@ -53,12 +53,12 @@ export const environment = {
       image: "/images/tokens/eth.svg",
       decimals: 18,
     },
-    // {
-    //   id: "USDT",
-    //   name: "Tether",
-    //   address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    //   image: "/images/tokens/usdt.svg",
-    //   decimals: 18,
-    // },
+    {
+      id: "USDT",
+      name: "Tether",
+      address: "0xC2C527C0CACF457746Bd31B2a698Fe89de2b6d49",
+      image: "/images/tokens/usdt.svg",
+      decimals: 6,
+    },
   ],
 };
